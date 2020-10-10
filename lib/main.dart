@@ -12,7 +12,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: 'Shopping List',
       theme: ThemeData(
         // This is the theme of your application.
         //
@@ -53,88 +53,93 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  String title = ''; 
+  String itemTitle = '';
+  List items = [];
+  
+  insertShoppingItems() async{
+    await insertItemsToDb(itemTitle, 0);
+    getItemsFromDb();
+  }
 
+  getItemsFromDb() async{
+    List shoppingItems = await retreiveItemsFromDb();
+    setState(() {
+      items = shoppingItems;
+    });
+
+  }
   @override
   Widget build(BuildContext context) {
+    getItemsFromDb();
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       appBar: AppBar(
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
         title: Text(widget.title),
       ),
       body: Center(
         child: Column(
-          // Column is also a layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
-          //
-          // Invoke "debug painting" (press "p" in the console, choose the
-          // "Toggle Debug Paint" action from the Flutter Inspector in Android
-          // Studio, or the "Toggle Debug Paint" command in Visual Studio Code)
-          // to see the wireframe for each widget.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).
           mainAxisAlignment: MainAxisAlignment.start,
           children: <Widget>[
             ListTile(
+              // text field
               title: TextFormField(
                 onChanged: (String mytitle) {
                   setState(() {
-                    title = mytitle;
+                    itemTitle = mytitle;
                   });
                 },
                 decoration:
                     InputDecoration(hintText: 'Title', labelText: 'Title'),
                 style: TextStyle(fontSize: 14),
               ),
+              // add button
               trailing: RaisedButton(
-                onPressed: () {
-                 
+                onPressed: () {// insert into the database
+                insertShoppingItems();
                 },
                 child: const Text('add', style: TextStyle(fontSize: 12)),
               ),
             ),
-           DataTable(
-                      columns: [
-                        DataColumn(
-                          label: Text("Select"),
-                          numeric: false,
-                        ),
-                        DataColumn(
-                          label: Text("Title"),
-                          numeric: false,
-                        ),
-                        DataColumn(
-                          label: Text("Delete"),
-                          numeric: false,
-                        )
-                      ],
-                      rows: []
-                          .map<DataRow>((item) => DataRow(cells: [
-                                DataCell(
-                                    Checkbox(
-                                        value:
-                                            item['BOUGHT'] == 1 ? true : false,
-                                        onChanged: (newValue) {
-                                        
-                                        }),
-                                    onTap: () {}),
-                                DataCell(Text(item['TITLE'], style: TextStyle(decoration:  item['BOUGHT'] == 1 ? TextDecoration.lineThrough : TextDecoration.none, ),), onTap: () {}),
-                                DataCell(
-                                    Icon(Icons.delete,
-                                        color: Color(0xffDB4437),
-                                        size: 20), onTap: () async {
-                                 
-                                }),
-                              ]))
-                          .toList(),
-                   
-               )
+            // Data
+            DataTable(
+              columns: [
+                DataColumn(
+                  label: Text("Select"),
+                  numeric: false,
+                ),
+                DataColumn(
+                  label: Text("Title"),
+                  numeric: false,
+                ),
+                DataColumn(
+                  label: Text("Delete"),
+                  numeric: false,
+                )
+              ],
+              rows: items
+                  .map<DataRow>((item) => DataRow(cells: [
+                        DataCell(
+                            Checkbox(
+                                value: item['BOUGHT'] == 1 ? true : false,
+                                onChanged: (newValue) {}),
+                            onTap: () {}),
+                        DataCell(
+                            Text(
+                              item['TITLE'],
+                              style: TextStyle(
+                                decoration: item['BOUGHT'] == 1
+                                    ? TextDecoration.lineThrough
+                                    : TextDecoration.none,
+                              ),
+                            ),
+                            onTap: () {}),
+                        DataCell(
+                            Icon(Icons.delete,
+                                color: Color(0xffDB4437), size: 20),
+                            onTap: () async {}),
+                      ]))
+                  .toList(),
+            )
           ],
         ),
       ),

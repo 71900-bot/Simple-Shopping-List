@@ -12,9 +12,20 @@ Future<Database> initilizaeDb() async {
   return db;
 }
 
+Future<void> insertItemsToDb(title, bought) async{
+  Database db = await initilizaeDb();
+  await db.transaction((txn) {
+    var dateAdded = DateTime.now().toString();
+    return txn.rawInsert("INSERT INTO SHOPPING_ITEMS(TITLE, BOUGHT, DATE_ADDED) VALUES('$title', $bought, '$dateAdded')");
+  }
+  );
+   print('the item has been added');
+}
 
-
-
+Future<List> retreiveItemsFromDb() async{
+  Database db = await initilizaeDb();
+  return db.rawQuery('SELECT * FROM SHOPPING_ITEMS');
+}
 
 
 
